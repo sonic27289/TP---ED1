@@ -1,0 +1,133 @@
+#include <iostream>
+#include <locale.h>
+using namespace std;
+
+struct No {
+	float dado;
+	struct No* prox;
+};
+
+struct Fila
+{
+	No* ini;
+	No* fim;
+};
+
+Fila* init()
+{
+	Fila* f = new Fila;
+	f->ini = NULL;
+	f->fim = NULL;
+	return f;
+}
+
+int isEmpty(Fila* f) {
+	return (f->ini == NULL);
+}
+
+void enqueue(Fila* f, float v) {
+	No* no = new No;
+	no->dado = v;
+	no->prox = NULL;
+	if (isEmpty(f)) {
+		f->ini = no;
+	}
+	else {
+		f->fim->prox = no;
+	}
+	f->fim = no;
+}
+
+float dequeue(Fila* f) {
+	float ret;
+	if (isEmpty(f)) {
+		ret = -1;
+	}
+	else {
+		No* no = f->ini;
+		ret = no->dado;
+		f->ini = no->prox;
+		if (f->ini == NULL) {
+			f->fim = NULL;
+		}
+		free(no);
+	}
+	return ret;
+}
+
+int count(Fila* f) {
+	int qtde = 0;
+	No* no;
+	no = f->ini;
+	while (no != NULL) {
+		qtde++;
+		no = no->prox;
+	}
+	return qtde;
+}
+
+void freeFila(Fila* f) {
+	No* no = f->ini;
+	while (no != NULL) {
+		No* temp = no->prox;
+		free(no);
+		no = temp;
+	}
+	free(f);
+}
+
+int main(int argc, char** argv)
+{
+	setlocale(LC_ALL, "");
+	bool sair = false;
+	int cont = 0;
+	int opcao = 0;
+
+	Fila* senhasGeradas = new Fila();
+	senhasGeradas = init();
+
+	Fila* senhasAtendidas = new Fila();
+	senhasAtendidas = init();
+
+	while (!sair) {
+		cout << " 0. Sair. \n 1. Gerar Senha \n 2. Realizar Atendimento\n" << endl;
+		cin >> opcao;
+
+		switch (opcao)
+		{
+		case 0:
+			if (isEmpty(senhasGeradas)) {
+				sair = true;
+				freeFila(senhasGeradas);
+				freeFila(senhasAtendidas);
+			}
+			else {
+				cout << "O Programa não pode ser encerrado, pois ainda ha senhas a serem atendidas. " << endl;
+			}
+			break;
+		case 1:
+			cont++;
+			enqueue(senhasGeradas, cont);
+			cout << "Senha Gerada com sucesso !" << endl;
+			cout << endl;
+			break;
+		case 2:
+			if (isEmpty(senhasGeradas)) {
+				cout << "Fila vazia" << endl;
+			}
+			else {
+				cout << "Senha: " << (senhasGeradas->ini->dado) << " atendida com sucesso !" << endl;
+				cout << endl;
+				enqueue(senhasAtendidas, senhasGeradas->ini->dado);
+				dequeue(senhasGeradas);
+				cout << "Senhas aguardando atendimento: " << count(senhasGeradas) << endl;
+			}
+			break;
+		default:
+			cout << "Informe uma opcao valida. " << endl;
+			break;
+		}
+	}
+
+	return 0;
+}
